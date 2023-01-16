@@ -4,6 +4,7 @@
 
 import sys
 import os
+import hashlib
 
 if __name__ == "__main__":
     def errprint(*args):
@@ -38,10 +39,27 @@ if __name__ == "__main__":
                 ulItem = lenOfLine - len(ulListItem)
                 olListItem = line.lstrip("*")
                 olItem = lenOfLine - len(olListItem)
-                bold = line.lstrip("**")
-                boldItem = lenOfLine - len(bold)
-                emph = line.lstrip("__")
-                emphItem = lenOfLine - len(emph)
+                string = str(line).replace("((", "").replace("))", "")
+                numString = lenOfLine - len(string)
+
+                if numString:
+                    newString = string.replace("C", "")
+                    line = newString.replace("c", "")
+
+                while "[[" in line and "]]" in line:
+                    hashStr = []
+                    for i in range(len(line)):
+                        if not i == len(line) - 1 and line[i] == "[" and line[i + 1] == "[":
+                            hashStr.append(i)
+                        elif not i == len(line) - 1 and line[i] == "]" and line[i + 1] == "]":
+                            hashStr.append(i)
+                    if hashStr:
+                        strSlice = slice(hashStr[0], hashStr[1] + 2)
+
+                    toHashStr = line[strSlice]
+                    toStrSlice = toHashStr[2:-2]
+                    md5Str = hashlib.md5(toStrSlice.encode()).hexdigest()
+                    line = line.replace(toHashStr, md5Str)
 
                 if 1 <= numOfHeading <= 6:
                     line = "<h{}>".format(numOfHeading) + heading.strip() + "</h{}>\n".format(numOfHeading)
